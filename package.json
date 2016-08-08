@@ -1,0 +1,33 @@
+{
+  "name": "jsonrpc2",
+  "version": "0.1.0",
+  "description": "JSON-RPC 2.0 Server & Client for Browser with Transport interfaces.",
+  "main": "dist/jsonrpc2.min.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Scukerman <nngoblin@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-uglify": "^2.0.0",
+    "tsc": "^1.20150623.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Scukerman/jsonrpc2.git"
+  },
+  "keywords": [
+    "jsonrpc2",
+    "websocket",
+    "http",
+    "transport",
+    "client",
+    "server"
+  ],
+  "bugs": {
+    "url": "https://github.com/Scukerman/jsonrpc2/issues"
+  },
+  "homepage": "https://github.com/Scukerman/jsonrpc2"
+}

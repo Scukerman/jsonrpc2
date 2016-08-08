@@ -1,0 +1,27 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "module": "system",
+        "target": "es5",
+        "noImplicitAny": false,
+        "outFile": "dist/jsonrpc2.js",
+        "sourceMap": false,
+        "pretty": true,
+        "removeComments": true
+    },
+    "files": [
+        "src/Helper/GUID.ts",
+        "src/Helper/Logger.ts",
+        "src/Transport/Transport.ts",
+        "src/Transport/HTTP.ts",
+        "src/Transport/Websocket.ts",
+        "src/JsonRPC2.ts",
+        "src/Client.ts",
+        "src/Model/ServerResponse.ts",
+        "src/Model/ClientRequest.ts",
+        "src/Model/Request.ts",
+        "src/Model/Notification.ts",
+        "src/Model/Response.ts",
+        "src/Model/Error.ts"
+    ]
+}
