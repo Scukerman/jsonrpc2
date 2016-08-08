@@ -1,5 +1,5 @@
 {
-  "name": "jsonrpc2",
+  "name": "ant-jsonrpc2",
   "version": "0.1.0",
   "description": "JSON-RPC 2.0 Server & Client for Browser with Transport interfaces.",
   "main": "dist/jsonrpc2.min.js",
