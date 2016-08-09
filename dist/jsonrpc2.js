@@ -190,7 +190,7 @@ var JSONRPC2;
                 }
                 else {
                     if (this.reconnectionAttempts == 0 && this.wasReached) {
-                        Logger.info("The connection has been lost.");
+                        Logger.info("The connection has been lost.", "Code:", ev.code);
                     }
                     else {
                         Logger.info("The server cannot be reached.");
