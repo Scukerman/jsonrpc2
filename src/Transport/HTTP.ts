@@ -15,8 +15,9 @@ namespace JSONRPC2 {
 				this.config = config;
 			}
 
-			public initiate() {
-			}
+			public setup() {}
+
+			close() {}
 
 			public doRequest(req: JSONRPC2.Model.ClientRequest): JQueryPromise<JSONRPC2.Model.ServerResponse> {
 				let dfd: JQueryDeferred<JSONRPC2.Model.ServerResponse> = jQuery.Deferred();

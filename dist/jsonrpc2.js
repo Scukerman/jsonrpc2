@@ -104,8 +104,8 @@ var JSONRPC2;
             function HTTP(config) {
                 this.config = config;
             }
-            HTTP.prototype.initiate = function () {
-            };
+            HTTP.prototype.setup = function () { };
+            HTTP.prototype.close = function () { };
             HTTP.prototype.doRequest = function (req) {
                 var dfd = jQuery.Deferred();
                 JSONRPC2.Helper.Logger.debug("==>", req.toJson());
@@ -153,8 +153,12 @@ var JSONRPC2;
                     maxReconnectAttempts: config.maxReconnectAttempts || 0
                 };
             }
-            Websocket.prototype.initiate = function () {
+            Websocket.prototype.setup = function () {
                 this.connect();
+            };
+            Websocket.prototype.close = function () {
+                this.socket.close(1000, "for reconnect");
+                this.wasReached = false;
             };
             Websocket.prototype.connect = function () {
                 Logger.info("Connecting to", this.options.url);
@@ -190,7 +194,7 @@ var JSONRPC2;
                 }
                 else {
                     if (this.reconnectionAttempts == 0 && this.wasReached) {
-                        Logger.info("The connection has been lost.", "Code:", ev.code);
+                        Logger.info("The connection has been lost.", "Code:", ev.code, "Reason:", ev.reason);
                     }
                     else {
                         Logger.info("The server cannot be reached.");
@@ -265,10 +269,16 @@ var JSONRPC2;
     var Client = (function () {
         function Client(transport) {
             this.transport = transport;
-            transport.initiate();
+            this.openConnection();
         }
         Client.prototype.execute = function (req) {
             return this.transport.doRequest(req);
+        };
+        Client.prototype.openConnection = function () {
+            this.transport.setup();
+        };
+        Client.prototype.closeConnection = function () {
+            this.transport.close();
         };
         return Client;
     }());

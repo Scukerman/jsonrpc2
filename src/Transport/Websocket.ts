@@ -29,8 +29,13 @@ namespace JSONRPC2 {
 				};
 			}
 
-			public initiate() {
+			public setup() {
 				this.connect();
+			}
+
+			public close() {
+				this.socket.close(1000, "for reconnect");
+				this.wasReached = false;
 			}
 
 			private connect() {
@@ -69,7 +74,7 @@ namespace JSONRPC2 {
 					Logger.info("The connection has been closed by server.");
 				} else {
 					if(this.reconnectionAttempts == 0 && this.wasReached) {
-						Logger.info("The connection has been lost.", "Code:", ev.code);
+						Logger.info("The connection has been lost.", "Code:", ev.code, "Reason:", ev.reason);
 					} else {
 						Logger.info("The server cannot be reached.");
 					}
