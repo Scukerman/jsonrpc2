@@ -196,8 +196,6 @@ var JSONRPC2;
                         Logger.info("The server cannot be reached.");
                     }
                     this.timeout = Math.floor(this.options.reconnectionInterval * Math.pow(this.options.reconnectDecay, this.reconnectionAttempts));
-                    Logger.debug("timeout:", this.timeout);
-                    Logger.debug("reconnectAttempts:", this.reconnectionAttempts);
                     setTimeout(function () {
                         this.reconnectionAttempts++;
                         this.reconnect();
