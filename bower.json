@@ -1,0 +1,28 @@
+{
+  "name": "jsonrpc2",
+  "description": "JSON-RPC 2.0 Server & Client for Browser with Transport interfaces.",
+  "main": "dist/jsonrpc2.min.js",
+  "authors": [
+    "Scukerman <nngoblin@gmail.com>"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "jsonrpc2",
+    "websocket",
+    "http",
+    "transport",
+    "client",
+    "server"
+  ],
+  "homepage": "https://github.com/Scukerman/jsonrpc2",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "1.9.1 - 3"
+  }
+}
