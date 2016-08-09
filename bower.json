@@ -1,7 +1,7 @@
 {
   "name": "jsonrpc2",
   "description": "JSON-RPC 2.0 Server & Client for Browser with Transport interfaces.",
-  "main": "dist/jsonrpc2.min.js",
+  "main": "dist/jsonrpc2.js",
   "authors": [
     "Scukerman <nngoblin@gmail.com>"
   ],
