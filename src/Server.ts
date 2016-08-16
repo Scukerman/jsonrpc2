@@ -1,71 +1,101 @@
 namespace JSONRPC2 {
-    export interface Receiver {
-        [methodName: string]: (params: { [paramName: string]: any; }) => any;
-    }
+	import Logger = JSONRPC2.Helper.Logger;
+	import ClientRequest = JSONRPC2.Model.ClientRequest;
+	export interface Receiver {
+		[methodName: string]: (params: { [paramName: string]: any; }) => any;
+	}
 
-    export class Server {
-        private receivers: { [key: string]: Receiver };
+	export class Server {
+		private transport: JSONRPC2.Transport.Transport;
+		private receivers: { [name: string]: Receiver } = {};
+		private debug: boolean = false;
 
-        constructor() {
-            this.receivers = {};
-        }
+		constructor(transport: JSONRPC2.Transport.Transport) {
+			this.transport = transport;
+			this.transport.addHandler(this.handleRequest.bind(this));
+			this.transport.setup();
 
-        public handleJSON(json: string|{[key: string]: any;}) {
-            let packet: {[key: string]: any;};
-            if(typeof json === 'string') {
-                packet = JSON.parse(<string>json);
-            }
+			Logger.info('[Server]', 'Server is started');
+		}
 
-            if(!('jsonrpc' in packet) || packet['jsonrpc'] != '2.0') {
-               // return new JSONRPC2.Model.Error()
-            }
+		public useDebug(debug: boolean): Server {
+			this.debug = debug;
+			if(debug == true) {
+				Logger.info('[Server]', 'Debug enabled');
+			}
+			return this;
+		}
 
-            let pkt: JSONRPC2.Model.Request|JSONRPC2.Model.Notification;
-            if('id' in packet) {
-                pkt = new JSONRPC2.Model.Request(packet['method'], packet['params'] || {}, packet['id']);
-            } else {
-                pkt = new JSONRPC2.Model.Notification(packet['method'], packet['params'] || {})
-            }
+		private handleRequest(data: string): void {
+			if(!Validator.isRequestPacket(data)) {
+				return;
+			}
 
-            return this.handle(pkt);
-        }
+			if(this.debug) {
+				Logger.debug('[Server]', '[Request]', data);
+			}
 
-        public handle(pkt: JSONRPC2.Model.Request|JSONRPC2.Model.Notification): void|JSONRPC2.Model.Response|JSONRPC2.Model.Error {
+			let pkt = JSONRPC2.Model.ClientRequest.fromJson(data);
 
-            let tmp: Array<string> = pkt.method.split(".", 2);
+			if(pkt instanceof JSONRPC2.Model.Error) {
+				this.sendResponse(pkt);
+			}
 
-            let rcvrName: string = tmp[0];
-            let rcvrFuncName: string = tmp[1];
+			// execute
+			let responsePromise: JQueryPromise<JSONRPC2.Model.ServerResponse> = this.executeRequest(<JSONRPC2.Model.ClientRequest>pkt);
 
-            if(!(rcvrName in this.receivers)) {
-                return new JSONRPC2.Model.Error((<JSONRPC2.Model.Request>pkt).getID(), -32601, JSONRPC2.ERROR_CODES['-32601'])
-            }
+			// determine the type
+			if(pkt instanceof JSONRPC2.Model.ClientRequest) {
+				responsePromise.always(function (pkt) {
+					this.sendResponse(pkt);
+				}.bind(this));
+			}
+		}
 
-            let rcvr: Receiver = this.receivers[rcvrName];
-            let rcvrMethod = rcvr[rcvrFuncName];
-            let rcvrResult: any = rcvrMethod(pkt.params);
+		private sendResponse(pkt: JSONRPC2.Model.ServerResponse) {
+			if(this.debug) {
+				Logger.debug('[Server]', '[Response]', pkt.toJson());
+			}
 
-            return new JSONRPC2.Model.Response((<JSONRPC2.Model.Request>pkt).getID(), rcvrResult);
-        }
+			this.transport.send(pkt.toJson());
+		}
 
-        public handleNotification(ntf: JSONRPC2.Model.Notification) {
+		private executeRequest(req: ClientRequest): JQueryPromise<JSONRPC2.Model.ServerResponse> {
+			let dfd: JQueryDeferred<JSONRPC2.Model.ServerResponse> = jQuery.Deferred();
 
-        }
+			let tmp: Array<string> = req.getMethod().split(".", 2);
 
-        public handleRequest(req: JSONRPC2.Model.Request): JSONRPC2.Model.Response {
-            let tmp: Array<string> = req.method.split(".", 2);
+			let rcvrName: string = tmp[0];
+			let rcvrFuncName: string = tmp[1];
 
-            let rcvrName: string = tmp[0];
-            let rcvrFuncName: string = tmp[1];
+			if(!(rcvrName in this.receivers)) {
+				dfd.reject(new JSONRPC2.Model.Error(JSONRPC2.ErrMethodNotFound, req.getID()));
+			}
 
-            let rcvr: Receiver = this.receivers[rcvrName];
-            let rcvrMethod = rcvr[rcvrFuncName];
-            let rcvrResult: any = rcvrMethod(req.params);
-            return new JSONRPC2.Model.Response(req.getID(), rcvrResult);
-        }
+			let rcvr: Receiver = this.receivers[rcvrName];
+			let rcvrMethod = rcvr[rcvrFuncName];
 
-        public register(name: string, rcvr: Receiver) {
-            this.receivers[name] = rcvr;
-        }
-    }
+			// async
+			setTimeout(function () {
+				let rcvrResult: any;
+				try {
+					rcvrResult = rcvrMethod(req.getParams());
+				} catch (e) {
+					let err = ErrInternalError;
+					if(e.message) {
+						err = jQuery.extend(err, {data: {reason: e.message}});
+					}
+					dfd.reject(new JSONRPC2.Model.Error(err, req.getID()));
+				}
+
+				dfd.resolve(new JSONRPC2.Model.Response(rcvrResult, req.getID()));
+			}.bind(this), 0);
+
+			return dfd.promise();
+		}
+
+		public register(name: string, rcvr: Receiver) {
+			this.receivers[name] = rcvr;
+		}
+	}
 }

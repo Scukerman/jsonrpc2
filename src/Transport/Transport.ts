@@ -1,9 +1,10 @@
 namespace JSONRPC2 {
 	export namespace Transport {
 		export interface Transport {
-			doRequest(req: JSONRPC2.Model.ClientRequest): JQueryPromise<JSONRPC2.Model.ServerResponse>;
-			setup();
-			close();
+			setup(): void;
+			close(): void;
+			send(request: string): void;
+			addHandler(callback: (data: string) => any): void;
 		}
 	}
 }

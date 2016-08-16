@@ -17,6 +17,8 @@
         "src/Transport/Websocket.ts",
         "src/JsonRPC2.ts",
         "src/Client.ts",
+        "src/Server.ts",
+        "src/Validator.ts",
         "src/Model/ServerResponse.ts",
         "src/Model/ClientRequest.ts",
         "src/Model/Request.ts",

@@ -12,7 +12,8 @@
     "gulp": "^3.9.1",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^2.0.0",
-    "tsc": "^1.20150623.0"
+    "tsc": "^1.20150623.0",
+    "tsd": "^0.6.5"
   },
   "repository": {
     "type": "git",

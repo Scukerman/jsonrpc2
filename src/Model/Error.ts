@@ -1,7 +1,7 @@
 namespace JSONRPC2 {
 	export namespace Model {
 		export class Error extends ServerResponse {
-			constructor(error: {code: number, message: string, data?: any}, id: number|string) {
+			constructor(error: ErrorInterface, id: number|string) {
 				super();
 				this.error = error;
 				this.id = id;

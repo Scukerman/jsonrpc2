@@ -1,5 +1,6 @@
 namespace JSONRPC2 {
 	export namespace Transport {
+		import Logger = JSONRPC2.Helper.Logger;
 		export class HTTPConfig {
 			public url: string;
 			public headers: { [key: string]: any; } = {
@@ -10,42 +11,39 @@ namespace JSONRPC2 {
 
 		export class HTTP implements Transport {
 			public config: HTTPConfig;
+			private handlers: ((data: string) => any)[];
 
 			constructor(config: HTTPConfig) {
 				this.config = config;
 			}
 
-			public setup() {}
+			public setup(): void {
+			}
 
-			close() {}
+			public close(): void {
+			}
 
-			public doRequest(req: JSONRPC2.Model.ClientRequest): JQueryPromise<JSONRPC2.Model.ServerResponse> {
-				let dfd: JQueryDeferred<JSONRPC2.Model.ServerResponse> = jQuery.Deferred();
-				JSONRPC2.Helper.Logger.debug("==>", req.toJson());
-
+			public send(request: string): void {
 				jQuery.ajax({
 					type: 'POST',
 					url: this.config.url,
 					dataType: 'text',
-					data: req.toJson(),
+					data: request,
 					headers: this.config.headers,
-					success: function(data: any, textStatus: string, jqXHR: JQueryXHR): any {
-						JSONRPC2.Helper.Logger.debug("<==", data);
-
-						if(data == undefined) {
-							return dfd.resolve(data);
-						}
-
-						let res = JSONRPC2.Model.ServerResponse.fromJson(data);
-						dfd.resolve(res);
+					success: function (data: any, textStatus: string, jqXHR: JQueryXHR): any {
+						this.handlers.forEach(function (handler: (data: string) => any) {
+							handler(data);
+						});
 					},
 					error: function (jqXHR: JQueryXHR, textStatus: string, errorThrown: string) {
-						console.log("server error:", errorThrown, textStatus);
+						Logger.error('Error:', errorThrown, textStatus);
 					}
 				});
-
-				return dfd.promise();
 			}
+
+			public addHandler(callback: (data: string) => any): void {
+				this.handlers.push(callback);
+			};
 		}
 	}
 }
