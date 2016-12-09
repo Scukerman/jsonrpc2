@@ -45,7 +45,7 @@ namespace JSONRPC2 {
 			let responsePromise: JQueryPromise<JSONRPC2.Model.ServerResponse> = this.executeRequest(<JSONRPC2.Model.ClientRequest>pkt);
 
 			// determine the type
-			if(pkt instanceof JSONRPC2.Model.ClientRequest) {
+			if(pkt instanceof JSONRPC2.Model.Request) {
 				responsePromise.always(function (pkt) {
 					this.sendResponse(pkt);
 				}.bind(this));

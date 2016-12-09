@@ -367,7 +367,7 @@ var JSONRPC2;
                 this.sendResponse(pkt);
             }
             var responsePromise = this.executeRequest(pkt);
-            if (pkt instanceof JSONRPC2.Model.ClientRequest) {
+            if (pkt instanceof JSONRPC2.Model.Request) {
                 responsePromise.always(function (pkt) {
                     this.sendResponse(pkt);
                 }.bind(this));
