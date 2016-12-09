@@ -25,49 +25,49 @@ var JSONRPC2;
 (function (JSONRPC2) {
     var Helper;
     (function (Helper) {
+        var LoggerType;
         (function (LoggerType) {
             LoggerType[LoggerType["LOG"] = 0] = "LOG";
             LoggerType[LoggerType["DEBUG"] = 1] = "DEBUG";
             LoggerType[LoggerType["ERROR"] = 2] = "ERROR";
             LoggerType[LoggerType["INFO"] = 3] = "INFO";
             LoggerType[LoggerType["WARN"] = 4] = "WARN";
-        })(Helper.LoggerType || (Helper.LoggerType = {}));
-        var LoggerType = Helper.LoggerType;
+        })(LoggerType = Helper.LoggerType || (Helper.LoggerType = {}));
         var Logger = (function () {
             function Logger() {
             }
             Logger.log = function () {
                 var messages = [];
                 for (var _i = 0; _i < arguments.length; _i++) {
-                    messages[_i - 0] = arguments[_i];
+                    messages[_i] = arguments[_i];
                 }
                 Logger.write(LoggerType.LOG, messages);
             };
             Logger.debug = function () {
                 var messages = [];
                 for (var _i = 0; _i < arguments.length; _i++) {
-                    messages[_i - 0] = arguments[_i];
+                    messages[_i] = arguments[_i];
                 }
                 Logger.write(LoggerType.DEBUG, messages);
             };
             Logger.error = function () {
                 var messages = [];
                 for (var _i = 0; _i < arguments.length; _i++) {
-                    messages[_i - 0] = arguments[_i];
+                    messages[_i] = arguments[_i];
                 }
                 Logger.write(LoggerType.ERROR, messages);
             };
             Logger.info = function () {
                 var messages = [];
                 for (var _i = 0; _i < arguments.length; _i++) {
-                    messages[_i - 0] = arguments[_i];
+                    messages[_i] = arguments[_i];
                 }
                 Logger.write(LoggerType.INFO, messages);
             };
             Logger.warn = function () {
                 var messages = [];
                 for (var _i = 0; _i < arguments.length; _i++) {
-                    messages[_i - 0] = arguments[_i];
+                    messages[_i] = arguments[_i];
                 }
                 Logger.write(LoggerType.WARN, messages);
             };
@@ -80,9 +80,9 @@ var JSONRPC2;
                 var date = new Date();
                 return [('0' + date.getDate()).slice(-2), ('0' + (date.getMonth() + 1)).slice(-2), date.getFullYear()].join('-') + ' ' + [('0' + date.getHours()).slice(-2), ('0' + date.getMinutes()).slice(-2), ('0' + date.getSeconds()).slice(-2)].join(':');
             };
-            Logger.types = ['log', 'debug', 'error', 'info', 'warn'];
             return Logger;
         }());
+        Logger.types = ['log', 'debug', 'error', 'info', 'warn'];
         Helper.Logger = Logger;
     })(Helper = JSONRPC2.Helper || (JSONRPC2.Helper = {}));
 })(JSONRPC2 || (JSONRPC2 = {}));
@@ -265,7 +265,7 @@ var JSONRPC2;
     JSONRPC2.VERSION = "2.0";
     JSONRPC2.ErrParseError = { code: -32700, message: "Parse error" };
     JSONRPC2.ErrInvalidRequest = { code: -32600, message: "Invalid Request" };
-    JSONRPC2.ErrMethodNotFound = { code: -32601, message: "Method not found" };
+    JSONRPC2.ErrMethodNotFound = { code: -32601, message: "Method \"{0}\" not found" };
     JSONRPC2.ErrInternalError = { code: -32603, message: "Internal error" };
 })(JSONRPC2 || (JSONRPC2 = {}));
 var JSONRPC2;
@@ -385,11 +385,18 @@ var JSONRPC2;
             var rcvrName = tmp[0];
             var rcvrFuncName = tmp[1];
             if (!(rcvrName in this.receivers)) {
-                dfd.reject(new JSONRPC2.Model.Error(JSONRPC2.ErrMethodNotFound, req.getID()));
+                var err = JSONRPC2.ErrMethodNotFound;
+                err.message = err.message.replace('{0}', req.getMethod());
+                dfd.reject(new JSONRPC2.Model.Error(err, req.getID()));
             }
             var rcvr = this.receivers[rcvrName];
             var rcvrMethod = rcvr[rcvrFuncName];
             setTimeout(function () {
+                if (typeof rcvrMethod === 'undefined') {
+                    var err = JSONRPC2.ErrMethodNotFound;
+                    err.message = err.message.replace('{0}', req.getMethod());
+                    dfd.reject(new JSONRPC2.Model.Error(err, req.getID()));
+                }
                 var rcvrResult;
                 try {
                     rcvrResult = rcvrMethod(req.getParams());
@@ -557,8 +564,9 @@ var JSONRPC2;
         var Request = (function (_super) {
             __extends(Request, _super);
             function Request(method, params) {
-                _super.call(this, method, params);
-                this.id = GUID.generate();
+                var _this = _super.call(this, method, params) || this;
+                _this.id = GUID.generate();
+                return _this;
             }
             return Request;
         }(Model.ClientRequest));
@@ -572,8 +580,9 @@ var JSONRPC2;
         var Notification = (function (_super) {
             __extends(Notification, _super);
             function Notification(method, params) {
-                _super.call(this, method, params);
-                this.id = undefined;
+                var _this = _super.call(this, method, params) || this;
+                _this.id = undefined;
+                return _this;
             }
             Notification.prototype.send = function (c) {
                 return _super.prototype.send.call(this, c);
@@ -590,9 +599,10 @@ var JSONRPC2;
         var Response = (function (_super) {
             __extends(Response, _super);
             function Response(result, id) {
-                _super.call(this);
-                this.result = result;
-                this.id = id;
+                var _this = _super.call(this) || this;
+                _this.result = result;
+                _this.id = id;
+                return _this;
             }
             Response.prototype.getResult = function () {
                 return this.result;
@@ -609,9 +619,10 @@ var JSONRPC2;
         var Error = (function (_super) {
             __extends(Error, _super);
             function Error(error, id) {
-                _super.call(this);
-                this.error = error;
-                this.id = id;
+                var _this = _super.call(this) || this;
+                _this.error = error;
+                _this.id = id;
+                return _this;
             }
             Error.prototype.getCode = function () {
                 return this.error.code;

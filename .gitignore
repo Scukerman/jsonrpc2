@@ -1,3 +1,13 @@
 .idea
 node_modules
 index.html
+
+src/*.js
+src/Helper/*.js
+src/Model/*.js
+src/Transport/*.js
+
+src/*.js.map
+src/Helper/*.js.map
+src/Model/*.js.map
+src/Transport/*.js.map

@@ -69,7 +69,9 @@ namespace JSONRPC2 {
 			let rcvrFuncName: string = tmp[1];
 
 			if(!(rcvrName in this.receivers)) {
-				dfd.reject(new JSONRPC2.Model.Error(JSONRPC2.ErrMethodNotFound, req.getID()));
+				let err = JSONRPC2.ErrMethodNotFound;
+				err.message = err.message.replace('{0}', req.getMethod());
+				dfd.reject(new JSONRPC2.Model.Error(err, req.getID()));
 			}
 
 			let rcvr: Receiver = this.receivers[rcvrName];
@@ -77,6 +79,12 @@ namespace JSONRPC2 {
 
 			// async
 			setTimeout(function () {
+				if(typeof rcvrMethod === 'undefined') {
+					let err = JSONRPC2.ErrMethodNotFound;
+					err.message = err.message.replace('{0}', req.getMethod());
+					dfd.reject(new JSONRPC2.Model.Error(err, req.getID()));
+				}
+
 				let rcvrResult: any;
 				try {
 					rcvrResult = rcvrMethod(req.getParams());
