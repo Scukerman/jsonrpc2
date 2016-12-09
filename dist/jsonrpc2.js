@@ -154,7 +154,8 @@ var JSONRPC2;
                     reconnectionInterval: config.reconnectionInterval || 1000,
                     maxReconnectionInterval: config.maxReconnectionInterval || 30000,
                     reconnectDecay: config.reconnectDecay || 2,
-                    maxReconnectAttempts: config.maxReconnectAttempts || 0
+                    maxReconnectAttempts: config.maxReconnectAttempts || 0,
+                    onOpenHandler: config.onOpenHandler || null
                 };
             }
             Websocket.prototype.setup = function () {
@@ -201,6 +202,7 @@ var JSONRPC2;
                 if (!this.wasReached) {
                     this.wasReached = true;
                 }
+                this.options.onOpenHandler && this.options.onOpenHandler();
             };
             Websocket.prototype.onClose = function (ev) {
                 this.isConnected = false;
@@ -387,7 +389,7 @@ var JSONRPC2;
             if (!(rcvrName in this.receivers)) {
                 var err = JSONRPC2.ErrMethodNotFound;
                 err.message = err.message.replace('{0}', req.getMethod());
-                dfd.reject(new JSONRPC2.Model.Error(err, req.getID()));
+                return dfd.reject(new JSONRPC2.Model.Error(err, req.getID()));
             }
             var rcvr = this.receivers[rcvrName];
             var rcvrMethod = rcvr[rcvrFuncName];

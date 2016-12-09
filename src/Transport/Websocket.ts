@@ -9,7 +9,8 @@ namespace JSONRPC2 {
 			reconnectionInterval?: number,
 			maxReconnectionInterval?: number,
 			reconnectDecay?: number,
-			maxReconnectAttempts?: number
+			maxReconnectAttempts?: number,
+			onOpenHandler?: () => any
 		}
 
 		export class Websocket implements Transport {
@@ -30,7 +31,8 @@ namespace JSONRPC2 {
 					reconnectionInterval: config.reconnectionInterval || 1000,
 					maxReconnectionInterval: config.maxReconnectionInterval || 30000,
 					reconnectDecay: config.reconnectDecay || 2,
-					maxReconnectAttempts: config.maxReconnectAttempts || 0
+					maxReconnectAttempts: config.maxReconnectAttempts || 0,
+					onOpenHandler: config.onOpenHandler || null
 				};
 			}
 
@@ -82,6 +84,8 @@ namespace JSONRPC2 {
 				if(!this.wasReached) {
 					this.wasReached = true;
 				}
+
+				this.options.onOpenHandler && this.options.onOpenHandler();
 			}
 
 			private onClose(ev: CloseEvent): void {

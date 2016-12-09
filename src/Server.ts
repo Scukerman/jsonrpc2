@@ -71,7 +71,7 @@ namespace JSONRPC2 {
 			if(!(rcvrName in this.receivers)) {
 				let err = JSONRPC2.ErrMethodNotFound;
 				err.message = err.message.replace('{0}', req.getMethod());
-				dfd.reject(new JSONRPC2.Model.Error(err, req.getID()));
+				return dfd.reject(new JSONRPC2.Model.Error(err, req.getID()));
 			}
 
 			let rcvr: Receiver = this.receivers[rcvrName];
