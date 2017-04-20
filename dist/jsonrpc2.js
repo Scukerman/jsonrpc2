@@ -1,8 +1,13 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var JSONRPC2;
 (function (JSONRPC2) {
     var Helper;
@@ -155,7 +160,8 @@ var JSONRPC2;
                     maxReconnectionInterval: config.maxReconnectionInterval || 30000,
                     reconnectDecay: config.reconnectDecay || 2,
                     maxReconnectAttempts: config.maxReconnectAttempts || 0,
-                    onOpenHandler: config.onOpenHandler || null
+                    onOpenHandler: config.onOpenHandler || null,
+                    onCloseHandler: config.onCloseHandler || null
                 };
             }
             Websocket.prototype.setup = function () {
@@ -208,9 +214,6 @@ var JSONRPC2;
                 this.isConnected = false;
                 if (ev.wasClean && ev.code === 1000) {
                     Logger.info('[Websocket]', 'The connection has closed normally.', 'Code:', ev.code, 'Reason:', '"' + ev.reason + '"');
-                    if (!this.options.alwaysReconnectOnClose) {
-                        return;
-                    }
                 }
                 else {
                     if (this.reconnectionAttempts == 0 && this.wasReached) {
@@ -219,6 +222,10 @@ var JSONRPC2;
                     else {
                         Logger.info('[Websocket]', 'The server cannot be reached.');
                     }
+                }
+                this.options.onCloseHandler && this.options.onCloseHandler();
+                if (!this.options.alwaysReconnectOnClose) {
+                    return;
                 }
                 this.timeout = Math.floor(this.options.reconnectionInterval * Math.pow(this.options.reconnectDecay, this.reconnectionAttempts));
                 setTimeout(function () {

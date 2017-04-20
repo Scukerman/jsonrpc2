@@ -3,8 +3,8 @@ JSON-RPC 2.0 Server &amp; Client for Browser with Transport interfaces.
 
 ```sh
 $ npm install
-$ tsd
-$ tsc
+$ ./node_modules/typings/dist/bin.js install dt~jquery --global
+$ ./node_modules/typescript/bin/tsc
 $ gulp
 ```
 
