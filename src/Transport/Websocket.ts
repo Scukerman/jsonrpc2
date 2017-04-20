@@ -11,6 +11,7 @@ namespace JSONRPC2 {
 			reconnectDecay?: number,
 			maxReconnectAttempts?: number,
 			onOpenHandler?: () => any
+			onCloseHandler?: () => any
 		}
 
 		export class Websocket implements Transport {
@@ -32,7 +33,8 @@ namespace JSONRPC2 {
 					maxReconnectionInterval: config.maxReconnectionInterval || 30000,
 					reconnectDecay: config.reconnectDecay || 2,
 					maxReconnectAttempts: config.maxReconnectAttempts || 0,
-					onOpenHandler: config.onOpenHandler || null
+					onOpenHandler: config.onOpenHandler || null,
+					onCloseHandler: config.onCloseHandler || null
 				};
 			}
 
@@ -93,15 +95,18 @@ namespace JSONRPC2 {
 
 				if(ev.wasClean && ev.code === 1000) {
 					Logger.info('[Websocket]', 'The connection has closed normally.', 'Code:', ev.code, 'Reason:', '"' + ev.reason + '"');
-					if(!this.options.alwaysReconnectOnClose) {
-						return;
-					}
 				} else {
 					if(this.reconnectionAttempts == 0 && this.wasReached) {
 						Logger.info('[Websocket]', 'The connection has been lost.', 'Code:', ev.code, 'Reason:', '"' + ev.reason + '"');
 					} else {
 						Logger.info('[Websocket]', 'The server cannot be reached.');
 					}
+				}
+
+				this.options.onCloseHandler && this.options.onCloseHandler();
+
+				if (!this.options.alwaysReconnectOnClose) {
+					return;
 				}
 
 				this.timeout = Math.floor(this.options.reconnectionInterval * Math.pow(this.options.reconnectDecay, this.reconnectionAttempts));
