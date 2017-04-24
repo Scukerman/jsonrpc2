@@ -14,3 +14,10 @@ namespace JSONRPC2 {
 	export const ErrInternalError: ErrorInterface = {code: -32603, message: "Internal error"};
 
 }
+
+// Here we expose the TypeScript services as an external module
+// so that it may be consumed easily like a node module.
+declare var module: any;
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = JSONRPC2;
+}

@@ -277,6 +277,9 @@ var JSONRPC2;
     JSONRPC2.ErrMethodNotFound = { code: -32601, message: "Method \"{0}\" not found" };
     JSONRPC2.ErrInternalError = { code: -32603, message: "Internal error" };
 })(JSONRPC2 || (JSONRPC2 = {}));
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = JSONRPC2;
+}
 var JSONRPC2;
 (function (JSONRPC2) {
     var Logger = JSONRPC2.Helper.Logger;
